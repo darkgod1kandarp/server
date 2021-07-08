@@ -39,7 +39,7 @@ app.post('/api/datagaining',verifyToken,(req,res)=>{
       res.sendStatus(403);
     }
     else{
-      res.json(req.query)
+      res.json({data:"/pg"})
      
     }
   })
