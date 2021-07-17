@@ -5,7 +5,50 @@ const cors = require("cors");
 const app = express();
 const mysql = require("mysql2");
 app.use(cors());
-app.use(express.json());
+app.use(express.json({limit:"50mb"}));
+var mailjet = require ('node-mailjet').connect("7a92a782bec6c95b4938cffe0dcafbc7","8834329e09ddf2c22105a769843ab089");
+
+const otp = () => {
+  let data = "";
+  for (let x = 0; x < 4; x++) {
+    data += `${Math.floor(Math.random() * 10)}`;
+  }
+  return data;
+};
+
+// function sendEmail(recipient) {
+//   const opo = otp();
+//   console.log(opo)
+//   return mailjet
+//     .post("send", { version: "v3.1" })
+//     .request({
+//       Messages: [
+//         {
+//           From: {
+//             Email: "rushabh.s1@ahduni.edu.in",
+//             Name: "your-application-name",
+//           },
+//           To: [
+//             {
+//               Email: recipient,
+//             },
+//           ],
+//           Subject: "OTP123",
+//           TextPart: opo,
+//                   },
+//       ],
+//     })
+//     .then((result) => {
+//       // do something with the send result or ignore
+      
+//     })
+//     .catch((err) => {
+//       // console.log(err)
+//       // handle an error
+//     });
+// }
+
+// sendEmail("rushabh.s1@ahduni.edu.in")
 var transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -29,13 +72,6 @@ cloudinary.config({
   api_secret: "J_FYy1R5c51yu92TXeuZ5YvGm9w",
 });
 
-const otp = () => {
-  let data = "";
-  for (let x = 0; x < 4; x++) {
-    data += `${Math.floor(Math.random() * 10)}`;
-  }
-  return data;
-};
 
 const pool = mysql.createPool({
   host: "localhost",
@@ -136,35 +172,69 @@ app.post("/api/signupowner", async (req, res) => {
 
 });
 
+app.post("/api/update",async(req,res)=>{
+  const {password,username} =req.body
+  let sql=`update userdetails set password='${password}' where name ='${username}'`
+  const [row1, column1] = await db.query(sql)
+    res.json({data:"updated"})
 
-app.post("/api/forgotpassword", verifyToken, (req, res) => {
-  jwt.verify(req.token, "secretkey", async (err, authData) => {
-    const { username } = req.body.data;
-    console.log(req.body.data);
+})
+
+app.post("/api/forgotpassword",async (req, res) => {
+    const { username } = req.body;
+    console.log(req.body);
     let sql = `select email from userdetails where name='${username}';`;
     const [row1, column1] = await db.query(sql);
-    if (err) {
-      res.sendStatus(403);
-    } else {
-      const opo = otp();
-      var mailOptions = {
-        from: "009kandarp@gmail.com",
-        to: `${row1[0].email}`,
-        subject: "Sending Email using Node.js",
-        text: opo,
-      };
 
-      console.log(row1[0].email);
-      transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          res.sendStatus(403);
-        } else {
-          res.json({ data: opo });
-        }
-      });
-    }
+    const opo=otp()
+
+    mailjet
+    .post("send", { version: "v3.1" })
+    .request({
+      Messages: [
+        {
+          From: {
+            Email: "rushabh.s1@ahduni.edu.in",
+            Name: "your-application-name",
+          },
+          To: [
+            {
+              Email: row1[0].email,
+            },
+          ],
+          Subject: "OTP123",
+          TextPart: opo,
+                  },
+      ],
+    })
+    .then((result) => {
+      console.log("send")
+      res.json({data:opo})
+      
+    })
+    .catch((err) => {
+      // console.log(err)
+      // handle an error
+    });
+      // var mailOptions = {
+      //   from: "009kandarp@gmail.com",
+      //   to: `${row1[0].email}`,
+      //   subject: "Sending Email using Node.js",
+      //   text: opo,
+      // };
+
+      // console.log(row1[0].email);
+
+      // transporter.sendMail(mailOptions, function (error, info) {
+      //   if (error) {
+      //     res.sendStatus(403);
+      //   } else {
+      //     res.json({ data: opo });
+      //   }
+      // });
+    
   });
-});
+
 
 app.post("/api/homepage", verifyToken, async (req, res) => {
   jwt.verify(req.token, "secretkey", async (err, authData) => {
