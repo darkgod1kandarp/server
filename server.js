@@ -69,7 +69,9 @@ app.post("/api/signin", verifyToken, (req, res) => {
       const [row1, column1] = await db.query(sql);
 
       if (row1[0].c1 == 0) {
-        res.json({ data: "/pg" });
+        
+        res.json({ data: "/" });
+
       } else {
         res.json({ data: "already have account" });
       }
@@ -82,7 +84,7 @@ app.post("/api/login1", verifyToken, (req, res) => {
     if (err) {
       res.sendStatus(403);
     } else {
-      const { username, password, acctype, email } = req.body;
+      const { username, password, email } = req.body;
       let sql = `select count(*) as c1 from userdetails where  name ='${username}'  and password='${password}';`;
       const [row1, column1] = await db.query(sql);
 
