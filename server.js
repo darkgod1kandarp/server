@@ -13,6 +13,20 @@ var transporter = nodemailer.createTransport({
     pass: "dipika@sharda123",
   },
 });
+var fileupload= require('express-fileupload');
+app.use(express.static("tmp"))
+
+app.use(fileupload({
+    useTempFiles:true,
+}))
+
+var cloudinary = require('cloudinary').v2;
+cloudinary.config({
+  cloud_name:"dtwhvz6fw",
+  api_key:"887421474662129",
+  api_secret:"J_FYy1R5c51yu92TXeuZ5YvGm9w"
+})
+
 
 const otp = () => {
   let data ="";
@@ -26,7 +40,7 @@ const pool = mysql.createPool({
   host: "localhost",
   database: "pgfinder",
   user: "root",
-  password: "123456",
+  password: "1234567",
   port: "3306",
 });
 const db = pool.promise();
@@ -59,21 +73,16 @@ app.post("/api/login", (req, res) => {
   });
 });
 
-app.post("/api/signin", (req, res) => {
+app.post("/api/signin",async (req, res) => {
   
    
       const { username, password, acctype, email } = req.body;
+      console.log(req.body)
       let sql = `select pgfinder.checking1('${username}', '${password}','${acctype}','${email}') as c1;`;
       const [row1, column1] = await db.query(sql);
-
+      console.log(row1)
       if (row1[0].c1 == 0) {
-        
-        jwt.sign("secretkey", (err, token) => {
-          res.json({
-            token,
-            data: row2[0]
-          });
-        });
+        res.json({ data: "no account" });
       } else {
         res.json({ data: "already have account" });
       }
@@ -81,12 +90,10 @@ app.post("/api/signin", (req, res) => {
   );
 
 
-app.post("/api/login1", verifyToken, (req, res) => {
-  jwt.verify(req.token, "secretkey", async (err, authData) => {
-    if (err) {
-      res.sendStatus(403);
-    } else {
-      const { username, password, email } = req.body;
+app.post("/api/login1",async (req, res) => {
+    
+      const { username, password} = req.body;
+      console.log(req.body)
       let sql = `select count(*) as c1 from userdetails where  name ='${username}'  and password='${password}';`;
       const [row1, column1] = await db.query(sql);
 
@@ -96,15 +103,9 @@ app.post("/api/login1", verifyToken, (req, res) => {
       } else {
         let sql = `select acctype from userdetails where name='${username}';`
         const [row2,column2] =  await db.query(sql);
-        jwt.sign("secretkey", (err, token) => {
-          res.json({
-            token,
-            data: row2[0]
-          });
-        });
+        res.json({data:row2[0].acctype})
         
-      }
-
+      
       // if(count===0){
       //   res.json(data)
       // }
@@ -113,24 +114,27 @@ app.post("/api/login1", verifyToken, (req, res) => {
       // }
     }
   });
-});
 
 
-app.post("/ownersignup",verifyToken,(req,res)=>{
-  jwt.verify(req.token, "secretkey", async (err, authData) => {
-    const { username, password, acctype, email } = req.body;
-    console.log(req.body.data);
-    let sql = `select email from userdetails where name='${username}';`
-    const [row1, column1] = await db.query(sql);
-    if (err) {
-      res.sendStatus(403);
-    } else {
 
 
-         }
-  });
+
+app.post("/api/signupowner",(req,res)=>{
+    
+  const {username,password,email,phoneNumber,personalImage,pgLicence} = req.body.data;   
+  
+  cloudinary.uploader.upload(personalImage,(err,result)=>{
+    
+    console.log(result);
+})
+  
+   
 
   
+  
+
+
+
 
 })
 
@@ -174,7 +178,7 @@ app.post("/api/homepage",verifyToken,async(req,res)=>{
     }
     else{
       const { username, password,email } = req.body;
-      let sql =`select acctype from userdetails where username ='${username}'; `
+      let sql =`select acctype from userdetails where name ='${username}'; `
       const [acctype1,column4]   =  await db.query(sql);
       res.json({acctype:acctype1[0].acctype});
     
@@ -201,6 +205,7 @@ function verifyToken(req, res, next) {
     res.sendStatus(403);
   }
 }
+
 
 
 const Port = process.env.PORT || 5000;
