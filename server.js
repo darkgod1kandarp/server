@@ -13,27 +13,28 @@ var transporter = nodemailer.createTransport({
     pass: "dipika@sharda123",
   },
 });
-var fileupload= require('express-fileupload');
-app.use(express.static("tmp"))
+var fileupload = require("express-fileupload");
+app.use(express.static("tmp"));
 
-app.use(fileupload({
-    useTempFiles:true,
-}))
+app.use(
+  fileupload({
+    useTempFiles: true,
+  })
+);
 
-var cloudinary = require('cloudinary').v2;
+var cloudinary = require("cloudinary").v2;
 cloudinary.config({
-  cloud_name:"dtwhvz6fw",
-  api_key:"887421474662129",
-  api_secret:"J_FYy1R5c51yu92TXeuZ5YvGm9w"
-})
-
+  cloud_name: "dtwhvz6fw",
+  api_key: "887421474662129",
+  api_secret: "J_FYy1R5c51yu92TXeuZ5YvGm9w",
+});
 
 const otp = () => {
-  let data ="";
+  let data = "";
   for (let x = 0; x < 4; x++) {
     data += `${Math.floor(Math.random() * 10)}`;
   }
-   return data;
+  return data;
 };
 
 const pool = mysql.createPool({
@@ -73,121 +74,110 @@ app.post("/api/login", (req, res) => {
   });
 });
 
-app.post("/api/signin",async (req, res) => {
-  
-   
-      const { username, password, acctype, email } = req.body;
-      console.log(req.body)
-      let sql = `select pgfinder.checking1('${username}', '${password}','${acctype}','${email}') as c1;`;
-      const [row1, column1] = await db.query(sql);
-      console.log(row1)
-      if (row1[0].c1 == 0) {
-        res.json({ data: "no account" });
-      } else {
-        res.json({ data: "already have account" });
-      }
-    }
-  );
+app.post("/api/signin", async (req, res) => {
+  const { username, password, acctype, email } = req.body;
+  console.log(req.body);
+  let sql = `select pgfinder.checking1('${username}', '${password}','${acctype}','${email}') as c1;`;
+  const [row1, column1] = await db.query(sql);
+  console.log(row1);
+  if (row1[0].c1 == 0) {
+    res.json({ data: "no account" });
+  } else {
+    res.json({ data: "already have account" });
+  }
+});
 
+app.post("/api/login1", async (req, res) => {
+  const { username, password } = req.body;
+  console.log(req.body);
+  let sql = `select count(*) as c1 from userdetails where  name ='${username}'  and password='${password}';`;
+  const [row1, column1] = await db.query(sql);
 
-app.post("/api/login1",async (req, res) => {
-    
-      const { username, password} = req.body;
-      console.log(req.body)
-      let sql = `select count(*) as c1 from userdetails where  name ='${username}'  and password='${password}';`;
-      const [row1, column1] = await db.query(sql);
+  const count = row1[0].c1;
+  if (count == 0) {
+    res.json({ data: "not found" });
+  } else {
+    let sql = `select acctype from userdetails where name='${username}';`;
+    const [row2, column2] = await db.query(sql);
+    res.json({ data: row2[0].acctype });
 
-      const count = row1[0].c1;
-      if (count == 0) {
-        res.json({ data: "not found" });
-      } else {
-        let sql = `select acctype from userdetails where name='${username}';`
-        const [row2,column2] =  await db.query(sql);
-        res.json({data:row2[0].acctype})
-        
-      
-      // if(count===0){
-      //   res.json(data)
-      // }
-      // else{
+    // if(count===0){
+    //   res.json(data)
+    // }
+    // else{
 
-      // }
-    }
+    // }
+  }
+});
+
+const StoringOnCloud = (dataURI) => {
+  cloudinary.uploader.upload(dataURI, (err, result) => {
+    return result.url;
   });
+};
 
+app.post("/api/signupowner", async (req, res) => {
+  const { username, password, email, phoneNumber, personalImage, pgLicence,acctype } = req.body;
 
-
-
-
-app.post("/api/signupowner",(req,res)=>{
-    
-  const {username,password,email,phoneNumber,personalImage,pgLicence} = req.body.data;   
-  
-  cloudinary.uploader.upload(personalImage,(err,result)=>{
-    
-    console.log(result);
-})
-  
-   
+  const personalImageUrl = await StoringOnCloud(personalImage);
+  const pgLicenceUrl = await StoringOnCloud(pgLicence);
 
   
-  
+  let sql = `select pgfinder.checking1('${username}', '${password}','${acctype}','${email}') as c1;`;
+  let [row1, column1] = await db.query(sql);
+  console.log(row1);
+  if (row1[0].c1 == 0) {
+    sql =` insert into OwnerDetails value('${username}','${personalImageUrl}','${pgLicenceUrl}',${phoneNumber});`
+    [row1, column1] = await db.query(sql);
+    res.json({ data: "account created" });
+  } else {
+    res.json({ data: "already have account" });
+  }
 
+});
 
-
-
-})
 
 app.post("/api/forgotpassword", verifyToken, (req, res) => {
   jwt.verify(req.token, "secretkey", async (err, authData) => {
     const { username } = req.body.data;
     console.log(req.body.data);
-    let sql = `select email from userdetails where name='${username}';`
+    let sql = `select email from userdetails where name='${username}';`;
     const [row1, column1] = await db.query(sql);
     if (err) {
       res.sendStatus(403);
     } else {
-      const opo = otp()
+      const opo = otp();
       var mailOptions = {
         from: "009kandarp@gmail.com",
         to: `${row1[0].email}`,
         subject: "Sending Email using Node.js",
-        text: opo
+        text: opo,
       };
 
-      
-       
       console.log(row1[0].email);
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
           res.sendStatus(403);
         } else {
-          res.json({data:opo})
+          res.json({ data: opo });
         }
       });
-     
     }
   });
 });
 
-app.post("/api/homepage",verifyToken,async(req,res)=>{
+app.post("/api/homepage", verifyToken, async (req, res) => {
   jwt.verify(req.token, "secretkey", async (err, authData) => {
-    
-    if(err){
+    if (err) {
       res.sendStatus(403);
+    } else {
+      const { username, password, email } = req.body;
+      let sql = `select acctype from userdetails where name ='${username}'; `;
+      const [acctype1, column4] = await db.query(sql);
+      res.json({ acctype: acctype1[0].acctype });
     }
-    else{
-      const { username, password,email } = req.body;
-      let sql =`select acctype from userdetails where name ='${username}'; `
-      const [acctype1,column4]   =  await db.query(sql);
-      res.json({acctype:acctype1[0].acctype});
-    
-
-    }
-
-  })
-})
-
+  });
+});
 
 function verifyToken(req, res, next) {
   const bearerHeader = req.headers["authorization"];
@@ -205,8 +195,6 @@ function verifyToken(req, res, next) {
     res.sendStatus(403);
   }
 }
-
-
 
 const Port = process.env.PORT || 5000;
 app.listen(Port, () => console.log("Server started on port 5000"));
