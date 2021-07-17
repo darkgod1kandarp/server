@@ -82,7 +82,7 @@ app.post("/api/login1", verifyToken, (req, res) => {
     if (err) {
       res.sendStatus(403);
     } else {
-      const { username, password } = req.body;
+      const { username, password, acctype, email } = req.body;
       let sql = `select count(*) as c1 from userdetails where  name ='${username}'  and password='${password}';`;
       const [row1, column1] = await db.query(sql);
 
@@ -90,7 +90,15 @@ app.post("/api/login1", verifyToken, (req, res) => {
       if (count == 0) {
         res.json({ data: "not found" });
       } else {
-        res.json({ data: "founded" });
+        let sql = `select acctype from userdetails where name='${username}';`
+        const [row2,column2] =  await db.query(sql);
+        jwt.sign("secretkey", (err, token) => {
+          res.json({
+            token,
+            data: row2[0]
+          });
+        });
+        
       }
 
       // if(count===0){
@@ -102,6 +110,25 @@ app.post("/api/login1", verifyToken, (req, res) => {
     }
   });
 });
+
+
+app.post("/ownersignup",verifyToken,(req,res)=>{
+  jwt.verify(req.token, "secretkey", async (err, authData) => {
+    const { username, password, acctype, email } = req.body;
+    console.log(req.body.data);
+    let sql = `select email from userdetails where name='${username}';`
+    const [row1, column1] = await db.query(sql);
+    if (err) {
+      res.sendStatus(403);
+    } else {
+
+
+         }
+  });
+
+  
+
+})
 
 app.post("/api/forgotpassword", verifyToken, (req, res) => {
   jwt.verify(req.token, "secretkey", async (err, authData) => {
@@ -125,7 +152,6 @@ app.post("/api/forgotpassword", verifyToken, (req, res) => {
       console.log(row1[0].email);
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
-          console.log(error);
           res.sendStatus(403);
         } else {
           res.json({data:opo})
@@ -136,6 +162,23 @@ app.post("/api/forgotpassword", verifyToken, (req, res) => {
   });
 });
 
+app.post("/api/homepage",verifyToken,async(req,res)=>{
+  jwt.verify(req.token, "secretkey", async (err, authData) => {
+    
+    if(err){
+      res.sendStatus(403);
+    }
+    else{
+      const { username, password,email } = req.body;
+      let sql =`select acctype from userdetails where username ='${username}'; `
+      const [acctype1,column4]   =  await db.query(sql);
+      res.json({acctype:acctype1[0].acctype});
+    
+
+    }
+
+  })
+})
 
 
 function verifyToken(req, res, next) {
@@ -154,5 +197,7 @@ function verifyToken(req, res, next) {
     res.sendStatus(403);
   }
 }
+
+
 const Port = process.env.PORT || 5000;
 app.listen(Port, () => console.log("Server started on port 5000"));
