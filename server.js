@@ -59,25 +59,27 @@ app.post("/api/login", (req, res) => {
   });
 });
 
-app.post("/api/signin", verifyToken, (req, res) => {
-  jwt.verify(req.token, "secretkey", async (err, authData) => {
-    if (err) {
-      res.sendStatus(403);
-    } else {
+app.post("/api/signin", (req, res) => {
+  
+   
       const { username, password, acctype, email } = req.body;
       let sql = `select pgfinder.checking1('${username}', '${password}','${acctype}','${email}') as c1;`;
       const [row1, column1] = await db.query(sql);
 
       if (row1[0].c1 == 0) {
         
-        res.json({ data: "/" });
-
+        jwt.sign("secretkey", (err, token) => {
+          res.json({
+            token,
+            data: row2[0]
+          });
+        });
       } else {
         res.json({ data: "already have account" });
       }
     }
-  });
-});
+  );
+
 
 app.post("/api/login1", verifyToken, (req, res) => {
   jwt.verify(req.token, "secretkey", async (err, authData) => {
