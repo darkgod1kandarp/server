@@ -110,16 +110,26 @@ app.post("/api/login", (req, res) => {
   };
 
   jwt.sign({ user }, "secretkey", (err, token) => {
-    if(err){
-      res.json({
-        message:"not verified"
-       });
-    }
     res.json({
-     message:"verified"
+    token
     });
+  
   });
 });
+app.post("/api/checking",(req,res)=>{
+  jwt.verify(req.token, "secretkey", async (err, authData) => {
+   if(err){
+    res.json({message:"not verified"});
+   }
+   else{
+    res.json({message:"verified"});
+
+   }
+  
+  })
+
+
+})
 
 
 
