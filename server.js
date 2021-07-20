@@ -5,7 +5,7 @@ const cors = require("cors");
 const app = express();
 const mysql = require("mysql2");
 app.use(cors());
-app.use(express.json());
+app.use(express.json({limit:"50mb"}));
 var transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -23,6 +23,7 @@ app.use(
 );
 
 var cloudinary = require("cloudinary").v2;
+const Address = require("ipaddr.js");
 cloudinary.config({
   cloud_name: "dtwhvz6fw",
   api_key: "887421474662129",
@@ -45,6 +46,13 @@ const pool = mysql.createPool({
   port: "3306",
 });
 const db = pool.promise();
+const StoringOnCloud = (dataURI) => {
+  cloudinary.uploader.upload(dataURI, (err, result) => {
+    return result.url;
+  });
+};
+
+
 app.post("/api/posts", verifyToken, (req, res) => {
   console.log(req.body);
   jwt.verify(req.token, "secretkey", (err, authData) => {
@@ -58,6 +66,41 @@ app.post("/api/posts", verifyToken, (req, res) => {
     }
   });
 });
+app.post("/api/pgadding",verifyToken,async(req,res)=>{
+  jwt.verify(req.token, "secretkey", (err, authData) => {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      const {username,address,plotarea,availability,costperbed,imgData,imgList,naximumcapacity,name,roomsforrent,rule,services,sharing,lat,lng,pgid}=req.body;
+      let sql =`insert into '${username}','${address}','${plotarea}','${availability}','${costperbed}','${roomsforrent}','${sharing}','${name}','${pgid}','${naximumcapacity}','${lat}','${lng}';`
+      await db.query(sql);
+      for (let i  = 0;i<imgData.length;i++){
+        const url = await StoringOnCloud(imgList[i])
+        sql =  `insert into imagesdata values('${pgid}','${url}','${imgData[i]}');`
+        await db.query(sql);
+      }
+      for (let j  = 0;j<rule.length;j++){
+       
+        sql =  `insert into ruleforpg values('${pgid}','${rule[j]}');`
+        await db.query(sql);
+      }
+      for (let k  = 0;k<services.length;k++){
+       
+        sql =  `insert into services values('${pgid}','${services[j]}');`
+        await db.query(sql);
+      }
+
+
+      
+
+
+      res.json({
+        message: "send successfully",
+      
+      });
+    }
+  });
+})
 
 app.post("/api/login", (req, res) => {
   // Mock user
@@ -73,6 +116,8 @@ app.post("/api/login", (req, res) => {
     });
   });
 });
+
+
 
 app.post("/api/signin", async (req, res) => {
   const { username, password, acctype, email } = req.body;
@@ -110,11 +155,6 @@ app.post("/api/login1", async (req, res) => {
   }
 });
 
-const StoringOnCloud = (dataURI) => {
-  cloudinary.uploader.upload(dataURI, (err, result) => {
-    return result.url;
-  });
-};
 
 app.post("/api/signupowner", async (req, res) => {
   const { username, password, email, phoneNumber, personalImage, pgLicence,acctype } = req.body;
