@@ -6,8 +6,6 @@ const app = express();
 const mysql = require("mysql2");
 app.use(cors());
 app.use(express.json({limit:"50mb"}));
-<<<<<<< HEAD
-=======
 var mailjet = require ('node-mailjet').connect("7a92a782bec6c95b4938cffe0dcafbc7","8834329e09ddf2c22105a769843ab089");
 
 const otp = () => {
@@ -18,40 +16,6 @@ const otp = () => {
   return data;
 };
 
-// function sendEmail(recipient) {
-//   const opo = otp();
-//   console.log(opo)
-//   return mailjet
-//     .post("send", { version: "v3.1" })
-//     .request({
-//       Messages: [
-//         {
-//           From: {
-//             Email: "rushabh.s1@ahduni.edu.in",
-//             Name: "your-application-name",
-//           },
-//           To: [
-//             {
-//               Email: recipient,
-//             },
-//           ],
-//           Subject: "OTP123",
-//           TextPart: opo,
-//                   },
-//       ],
-//     })
-//     .then((result) => {
-//       // do something with the send result or ignore
-      
-//     })
-//     .catch((err) => {
-//       // console.log(err)
-//       // handle an error
-//     });
-// }
-
-// sendEmail("rushabh.s1@ahduni.edu.in")
->>>>>>> c2d45d3f211166fe0f315fe18738456408f8c577
 var transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -106,10 +70,7 @@ app.post("/api/posts", verifyToken, (req, res) => {
   });
 });
 app.post("/api/pgadding",verifyToken,async(req,res)=>{
-  jwt.verify(req.token, "secretkey", (err, authData) => {
-    if (err) {
-      res.sendStatus(403);
-    } else {
+ 
       const {username,address,plotarea,availability,costperbed,imgData,imgList,naximumcapacity,name,roomsforrent,rule,services,sharing,lat,lng,pgid}=req.body;
       let sql =`insert into '${username}','${address}','${plotarea}','${availability}','${costperbed}','${roomsforrent}','${sharing}','${name}','${pgid}','${naximumcapacity}','${lat}','${lng}';`
       await db.query(sql);
@@ -137,9 +98,8 @@ app.post("/api/pgadding",verifyToken,async(req,res)=>{
         message: "send successfully",
       
       });
-    }
+    
   });
-})
 
 app.post("/api/login", (req, res) => {
   // Mock user
