@@ -1,3 +1,4 @@
+
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
@@ -50,8 +51,11 @@ const pool = mysql.createPool({
 });
 const db = pool.promise();
 const StoringOnCloud = (dataURI) => {
+
   cloudinary.uploader.upload(dataURI, (err, result) => {
+    console.log(result.url,1241)
     return result.url;
+    
   });
 };
 
@@ -69,24 +73,35 @@ app.post("/api/posts", verifyToken, (req, res) => {
     }
   });
 });
-app.post("/api/pgadding",verifyToken,async(req,res)=>{
+app.post("/api/pgadding",async(req,res)=>{
  
-      const {username,address,plotarea,availability,costperbed,imgData,imgList,naximumcapacity,name,roomsforrent,rule,services,sharing,lat,lng,pgid}=req.body;
-      let sql =`insert into '${username}','${address}','${plotarea}','${availability}','${costperbed}','${roomsforrent}','${sharing}','${name}','${pgid}','${naximumcapacity}','${lat}','${lng}';`
+      const {username,address,PlotArea,avaibility,costPerBed,imgData,imgList,maximumCapacity,flatName,roomsForRent,rule,services,sharing,lat,lng,pgid}=req.body;
+      let sql =`insert into pgbasicdetails values ('${username}','${address}','${PlotArea}','${avaibility}','${costPerBed}','${roomsForRent}','${sharing}','${flatName}','${pgid}','${maximumCapacity}',${lat},${lng});`
+      console.log(sql,213)
       await db.query(sql);
-      for (let i  = 0;i<imgData.length;i++){
-        const url = await StoringOnCloud(imgList[i])
-        sql =  `insert into imagesdata values('${pgid}','${url}','${imgData[i]}');`
-        await db.query(sql);
+      const imgList1 = imgList[0];
+     const imgData1=imgData[0]
+     const rule1=rule[0]
+     const service1=services[0]
+      for (let i  = 0;i<imgList1.length;i++){
+        console.log(imgData1[`${i}`])
+        cloudinary.uploader.upload(imgList1[i], async (err, result) => {
+          console.log(result.url,1241)
+          sql =  `insert into imagesdata values('${pgid}','${result.url}','${imgData1[`${i}`]}');`
+          console.log(sql)
+          await db.query(sql);  
+
+        });
+        
       }
-      for (let j  = 0;j<rule.length;j++){
-       
-        sql =  `insert into ruleforpg values('${pgid}','${rule[j]}');`
+      for (let j  = 0;j<rule1.length;j++){     
+       console.log(rule1)
+        sql =  `insert into ruleforpg values('${pgid}','${rule1[j]}');`
         await db.query(sql);
-      }
-      for (let k  = 0;k<services.length;k++){
-       
-        sql =  `insert into services values('${pgid}','${services[j]}');`
+      }     
+      for (let k in service1){
+             console.log(k,service1[k])
+        sql =  `insert into services values('${pgid}','${k}','${service1[k]}');`
         await db.query(sql);
       }
 
@@ -116,9 +131,11 @@ app.post("/api/login", (req, res) => {
   
   });
 });
-app.post("/api/checking",(req,res)=>{
+app.post("/api/checking", verifyToken,(req,res)=>{
+  
   jwt.verify(req.token, "secretkey", async (err, authData) => {
    if(err){
+     console.log(err)
     res.json({message:"not verified"});
    }
    else{
