@@ -1,4 +1,3 @@
-
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
@@ -46,7 +45,7 @@ const pool = mysql.createPool({
   host: "localhost",
   database: "pgfinder",
   user: "root",
-  password: "1234567",
+  password: "123456",
   port: "3306",
 });
 const db = pool.promise();
@@ -58,6 +57,15 @@ const StoringOnCloud = (dataURI) => {
     
   });
 };
+
+app.post("/api/carddata",async(req,res)=>{
+  const {city} = req.body;
+  let sql = ` select * from  userdetails,OwnerDetails ,pgbasicdetails,imagesdata,ruleforpg,services where userdetails.name = OwnerDetails.name1 and  pgbasicdetails.name1 = OwnerDetails.name1  and pgbasicdetails.pgid = imagesdata.pgid and pgbasicdetails.pgid =ruleforpg.pgid and services.pgid;`
+  let[row1,column1] = await db.query(sql);
+  console.log(row1);
+  res.json({data:"kwnrkwnr"});
+
+})
 
 
 app.post("/api/posts", verifyToken, (req, res) => {
@@ -135,7 +143,7 @@ app.post("/api/checking", verifyToken,(req,res)=>{
   
   jwt.verify(req.token, "secretkey", async (err, authData) => {
    if(err){
-     console.log(err)
+    //  console.log(err)
     res.json({message:"not verified"});
    }
    else{
@@ -190,16 +198,28 @@ app.post("/api/login1", async (req, res) => {
 app.post("/api/signupowner", async (req, res) => {
   const { username, password, email, phoneNumber, personalImage, pgLicence,acctype } = req.body;
 
-  const personalImageUrl = await StoringOnCloud(personalImage);
-  const pgLicenceUrl = await StoringOnCloud(pgLicence);
+  // const personalImageUrl = await StoringOnCloud(personalImage);
+ let pgLicenceUrl,personalImageUrl
+  await cloudinary.uploader.upload(personalImage, (err, result) => {
+    
+    personalImageUrl =  result.url;
+    
+  });
+  await cloudinary.uploader.upload(pgLicence, (err, result) => {
+  
+     pgLicenceUrl  =  result.url;
+    
+  });
 
   
   let sql = `select pgfinder.checking1('${username}', '${password}','${acctype}','${email}') as c1;`;
   let [row1, column1] = await db.query(sql);
-  console.log(row1);
+ 
   if (row1[0].c1 == 0) {
-    sql =` insert into OwnerDetails value('${username}','${personalImageUrl}','${pgLicenceUrl}',${phoneNumber});`
-    [row1, column1] = await db.query(sql);
+    console.log(1234)
+    sql =` insert into ownerdetails values('${username}','${personalImageUrl}','${pgLicenceUrl}',${phoneNumber});`
+    console.log(sql)
+    let [row1, column1] = await db.query(sql);
     res.json({ data: "account created" });
   } else {
     res.json({ data: "already have account" });
