@@ -4,13 +4,16 @@ const nodemailer = require("nodemailer");
 const cors = require("cors");
 const app = express();
 const mysql = require("mysql2");
+const distance = require('google-distance-matrix');
+distance.key('AIzaSyCejofxtxXDqgb1_xYwkgZy06mF-VNa15Q');
+
 app.use(cors());
 app.use(express.json({limit:"50mb"}));
 var mailjet = require ('node-mailjet').connect("7a92a782bec6c95b4938cffe0dcafbc7","8834329e09ddf2c22105a769843ab089");
 
 const otp = () => {
   let data = "";
-  for (let x = 0; x < 4; x++) {
+  for (let x = 0; x < 4; x++) { 
     data += `${Math.floor(Math.random() * 10)}`;
   }
   return data;
@@ -57,13 +60,75 @@ const StoringOnCloud = (dataURI) => {
     
   });
 };
+const firing = (refineddata,refinedpgid,origins,destinations)=>{
+  distance.matrix(origins, destinations, function (err, distances) {   
+    if (distances.status == 'OK') {
+      var origin = distances.origin_addresses[0];
+      
+              var destination = distances.destination_addresses[0];
+              if (distances.rows[0].elements[0].status == 'OK') {
+                var distance = distances.rows[0].elements[0].distance.text;
+                refineddata.push(row1[x]);        
+                refinedpgid.push(row1[x].pgid);
+                return {refineddata,refineddata }
+            } 
+    }
+})
+}
 
 app.post("/api/carddata",async(req,res)=>{
-  const {city} = req.body;
-  let sql = ` select * from  userdetails,OwnerDetails ,pgbasicdetails,imagesdata,ruleforpg,services where userdetails.name = OwnerDetails.name1 and  pgbasicdetails.name1 = OwnerDetails.name1  and pgbasicdetails.pgid = imagesdata.pgid and pgbasicdetails.pgid =ruleforpg.pgid and services.pgid;`
+  const {city,lat,lon} = req.body;
+  const origins =[`${lat},${lon}`]
+  let sql = ` select * from userdetails inner join ownerdetails on userdetails.name = ownerdetails.name1 inner join pgbasicdetails on pgbasicdetails.name1 = ownerdetails.name1 ;`
   let[row1,column1] = await db.query(sql);
-  console.log(row1);
-  res.json({data:"kwnrkwnr"});
+  const datagaining = row1[0];  
+  const refineddata = [];
+  const refinedpgid = [];
+  let data = {}
+  for (x in row1){
+    const destinations = [`${row1[x].lat},${row1[x].lng}`]
+           
+    distance.matrix(origins, destinations, function (err, distances) {   
+      if (distances.status == 'OK') {
+        var origin = distances.origin_addresses[0]; 
+        
+                var destination = distances.destination_addresses[0];
+                if (distances.rows[0].elements[0].status == 'OK') {
+                  var distance = distances.rows[0].elements[0].distance.text;
+                  let array1 = distance.split(" ");
+                  let distanceint =  Number(array1[0])
+                  console.log(distanceint);
+                  if (distanceint<150){
+                  refineddata.push(row1[x]);        
+                 refinedpgid.push(row1[x].pgid);
+                 data = {...data,[row1[x].pgid]:refineddata[0]} 
+                 
+                  }
+              } 
+      }
+  })
+  
+  }  
+
+ 
+  setTimeout(async()=>{ 
+    for (x in refinedpgid){
+      sql = `select * from ruleforpg where pgid  ='${refinedpgid[x]}'`
+      console.log(sql);
+      let[row1,column1] = await db.query(sql);
+      data[refinedpgid[x]] = {...data[refinedpgid[x]],rule:[row1[x].rule]}
+      sql = `select imgurl,description from imagesdata where pgid ='${refinedpgid[x]}'`
+      let [row2,column2] =  await db.query(sql);
+      data[refinedpgid[x]] = {...data[refinedpgid[x]],url:row2}
+      sql = `select service,condition1 from services where pgid ='${refinedpgid[x]}'`
+      let [row3,column3] =  await db.query(sql);
+      data[refinedpgid[x]] = {...data[refinedpgid[x]],services:row3}
+ 
+   }
+   setTimeout(()=>{res.json({data})},1000)
+  },1000) ;         
+   
+   
 
 })
 
@@ -90,11 +155,11 @@ app.post("/api/pgadding",async(req,res)=>{
       const imgList1 = imgList[0];
      const imgData1=imgData[0]
      const rule1=rule[0]
-     const service1=services[0]
+     const service1=services[0] 
       for (let i  = 0;i<imgList1.length;i++){
         console.log(imgData1[`${i}`])
-        cloudinary.uploader.upload(imgList1[i], async (err, result) => {
-          console.log(result.url,1241)
+        await cloudinary.uploader.upload(imgList1[i], async (err, result) => {
+          
           sql =  `insert into imagesdata values('${pgid}','${result.url}','${imgData1[`${i}`]}');`
           console.log(sql)
           await db.query(sql);  
@@ -289,7 +354,7 @@ app.post("/api/forgotpassword",async (req, res) => {
       // });
     
   });
-
+         
 
 app.post("/api/homepage", verifyToken, async (req, res) => {
   jwt.verify(req.token, "secretkey", async (err, authData) => {
@@ -297,6 +362,7 @@ app.post("/api/homepage", verifyToken, async (req, res) => {
       res.sendStatus(403);
     } else {
       const { username, password, email } = req.body;
+      console.log(username);
       let sql = `select acctype from userdetails where name ='${username}'; `;
       const [acctype1, column4] = await db.query(sql);
       res.json({ acctype: acctype1[0].acctype });
