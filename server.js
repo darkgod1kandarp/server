@@ -76,6 +76,23 @@ const firing = (refineddata, refinedpgid, origins, destinations) => {
   });
 };
 
+app.get("/api/verificationpg",async(req,res)=>{
+
+  let sql = `select * from verified ,pgbasicdetails,ownerdetails where verfied  = 0 and  verified.pgid =pgbasicdetails.pgid and pgbasicdetails.name1 = ownerdetails.name1;`
+  let [verifiedone , column2] =  await db.query(sql);
+  console.log(verifiedone);   
+  res.json({data:verifiedone});   
+        
+    
+})    
+
+app.post("/api/dataremoving",async(req,res)=>{
+  const {id} = req.body;
+  sql = `update verified set verfied = 1 where pgid='${id}'`
+  let [row1, column1] = await db.query(sql);
+  res.json({data:"successfully done"})
+})
+
 app.post("/api/carddata", async (req, res) => {
   const { city, lat, lon } = req.body;
   const origins = [`${lat},${lon}`];
