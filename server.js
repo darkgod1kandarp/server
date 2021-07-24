@@ -187,7 +187,7 @@ app.post("/api/pgadding", async (req, res) => {
   }
   for (let k in service) {
    
-    sql = `insert into services values('${pgid}','${k}');`;
+    sql = `insert into services values('${pgid}','${service[k]}');`;
     await db.query(sql);
   }
   
