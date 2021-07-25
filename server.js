@@ -47,7 +47,7 @@ cloudinary.config({
 });
 
 const pool = mysql.createPool({
-  host: "localhost",
+  host: "34.93.181.36",
   database: "pgfinder",
   user: "root",
   password: "123456",
@@ -91,6 +91,36 @@ app.post("/api/dataremoving",async(req,res)=>{
   sql = `update verified set verfied = 1 where pgid='${id}'`
   let [row1, column1] = await db.query(sql);
   res.json({data:"successfully done"})
+})  
+
+app.post("/api/query",async(req,res)=>{
+  const {available,bedrooms,location,max_area,max_budget,min_area,min_budget,service,sharing} = req.body;
+  
+  let sql =`select * from verified ,pgbasicdetails,ownerdetails  where verified.pgid =pgbasicdetails.pgid and pgbasicdetails.name1 = ownerdetails.name1 and availability  in (?)  and  roomsforrent in (?) and ${min_budget}<=costperbed<=${max_budget} and sharing in (?) and ${min_area}<=plotsize<=${max_area};`
+
+  let [data,column1] =  await db.query(sql,[available,bedrooms,sharing]);
+  Object.keys(location).map((key,index)=>{
+    const origins = [`${location[key].lat},${location[key].lon}`];
+    for(x in data){
+      const destinations = [`${data[x].lat},${data[x].lng}`]
+    distance.matrix(origins, destinations, function (err, distances) {
+      
+      if (distances.status == "OK") {
+        if (distances.rows[0].elements[0].status == "OK") {
+          var distance = distances.rows[0].elements[0].distance.text;
+          let array1 = distance.split(" ");
+          let distanceint = Number(array1[0]);
+                  
+          if (distanceint < 150) {     
+            console.log(distanceint,123);
+          }
+        }
+      }   
+    });
+  }
+
+  })
+  res.json({data:"ekefkef"})
 })
 
 app.post("/api/carddata", async (req, res) => {
@@ -144,6 +174,11 @@ app.post("/api/carddata", async (req, res) => {
     }, 1000);
   }, 10000);
 });
+app.post("/api/completion",async(req,res)=>{
+  console.log(req.body);
+  res.json({data:"egjk"});
+
+})
 
 app.post("/api/posts", verifyToken, (req, res) => {
   console.log(req.body);
@@ -169,15 +204,15 @@ app.post("/api/pgadding", async (req, res) => {
     imgList,
     maximumCapacity,
     flatName,
-    roomsForRent,
+    roomsForRent,      //bhk
     rule,
     service,
     sharing,
-    lat,
+    lat,   
     lng,
     pgid,  
   } = req.body;
-  let sql = `insert into pgbasicdetails values ('${username}','${address}','${PlotArea}','${avaibility}','${costPerBed}','${roomsForRent}','${sharing}','${flatName}','${pgid}','${maximumCapacity}',${lat},${lng});`;
+  let sql = `insert into pgbasicdetails values ('${username}','${address}','${avaibility}','${roomsForRent}','${sharing}','${flatName}','${pgid}','${maximumCapacity}',${lat},${lng},${PlotArea},${costPerBed});`;
   console.log(sql, 213);
   await db.query(sql);
   const imgList1 = imgList[0];
@@ -187,14 +222,15 @@ app.post("/api/pgadding", async (req, res) => {
   for (let i = 0; i < imgList1.length; i++) {
     console.log(imgData1[`${i}`]);
     await cloudinary.uploader.upload(imgList1[i], async (err, result) => {
-      if(err){
+      if(!err){
         console.log(err);  
-      }
+      
       sql = `insert into imagesdata values('${pgid}','${result.url}','${
         imgData1[`${i}`]       
       }');`;
       console.log(sql);
       await db.query(sql);
+    }
     });
   }  
   for (let j = 0; j < rule1.length; j++) {
