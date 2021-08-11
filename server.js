@@ -51,15 +51,30 @@ app.use(
 //   api_secret: "7Tin6b3Em8ThMYGHLWvyNBPzXRk",
 // });
 
+
+var characters1       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#&%@_*';
+var characterlength1  =  character1.length;
+object1 = {}
+object2 = {}
+ for(var i = 0; i<length1;  i++){
+
+        var c1 = characters.charAt(Math.floor(Math.random() * charactersLength))
+        var c2 = characters.charAt(Math.floor(Math.random() * charactersLength))
+        object1[c1] = c2;
+        object2[c2] =  c1;
+ }
+
+
 function makeid(length) {
   var result           = '';
   var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+ 
   var charactersLength = characters.length;
   for ( var i = 0; i < length; i++ ) {
     result += characters.charAt(Math.floor(Math.random() * 
 charactersLength));
  }
- return result;
+ 
 }
 
 
@@ -281,7 +296,7 @@ const db = pool.promise();
 //   });
 // });
 
-app.get("/api/jwttoken", (req, res) => {
+app.get("/jwttoken", (req, res) => {
   // Mock user
   
 
@@ -294,12 +309,13 @@ app.get("/api/jwttoken", (req, res) => {
 
   
 
-app.post("/api/signup",async(req,res)=>{
+app.post("/signup",async(req,res)=>{
 
    const {username ,email,password} = req.body;
    
    let sql = `  select checking1('${makeid(11)}','${username}','${email}','${password}') as c1;`
-   console.log(sql);
+   
+
    const [row1] =  await db.query(sql);
   
    if(row1[0].c1===1){
@@ -310,7 +326,7 @@ app.post("/api/signup",async(req,res)=>{
    }
 })  
 
-app.post("/api/signin",async(req,res)=>{
+app.post("/signin",async(req,res)=>{
   const {username,password} =  req.body;
   let sql  = `select count(*) as c1 from userinfo where username = '${username}' and password = '${password}';`
   console.log(sql);
@@ -330,7 +346,7 @@ app.post("/api/signin",async(req,res)=>{
 
 
 
-app.post("/api/checking", verifyToken, (req, res) => {
+app.post("/checking", verifyToken, (req, res) => {
   jwt.verify(req.token, "secretkey", async (err, authData) => {
     if (err) {
       //  console.log(err)
@@ -341,7 +357,7 @@ app.post("/api/checking", verifyToken, (req, res) => {
   });
 });
 
-app.post("/api/forgotpassword", async (req, res) => {
+app.post("/forgotpassword", async (req, res) => {
   const { username } = req.body;
   console.log(req.body);
   let sql = `select email from userdetails where name='${username}';`;
