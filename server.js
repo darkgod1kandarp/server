@@ -10,9 +10,9 @@ const { v4: uuidv4 } = require('uuid');
 
 
 app.use(cors());  
-let bodyParser = require('body-parser');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// let bodyParser = require('body-parser');
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json({ limit: "50mb" }));
 var mailjet = require("node-mailjet").connect(
   "7a92a782bec6c95b4938cffe0dcafbc7",
@@ -53,13 +53,13 @@ app.use(
 
 
 var characters1       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#&%@_*';
-var characterlength1  =  character1.length;
+var length1  =  characters1.length;
 object1 = {}
 object2 = {}
  for(var i = 0; i<length1;  i++){
 
-        var c1 = characters.charAt(Math.floor(Math.random() * charactersLength))
-        var c2 = characters.charAt(Math.floor(Math.random() * charactersLength))
+        var c1 = characters1.charAt(Math.floor(Math.random() * length1))
+        var c2 = characters1.charAt(Math.floor(Math.random() * length1))
         object1[c1] = c2;
         object2[c2] =  c1;
  }
