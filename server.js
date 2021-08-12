@@ -74,7 +74,7 @@ function makeid(length) {
     result += characters.charAt(Math.floor(Math.random() * 
 charactersLength));
  }
- 
+ return result;
 }
 
 
