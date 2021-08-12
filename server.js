@@ -312,8 +312,8 @@ app.get("/jwttoken", (req, res) => {
 app.post("/signup",async(req,res)=>{
 
    const {username ,email,password} = req.body;
-   
-   let sql = `  select checking1('${makeid(11)}','${username}','${email}','${password}') as c1;`
+   const uuid1 = makeid(11)
+   let sql = `  select checking1('${uuid1}','${username}','${email}','${password}') as c1;`
    
 
    const [row1] =  await db.query(sql);
@@ -322,13 +322,13 @@ app.post("/signup",async(req,res)=>{
     res.json({message:"alva"})
    }
    else{
-    res.json({message:"nalva"})
+    res.json({message:"nalva",data:`${uuid1}`})
    }
 })  
 
 app.post("/signin",async(req,res)=>{
-  const {username,password} =  req.body;
-  let sql  = `select count(*) as c1 from userinfo where username = '${username}' and password = '${password}';`
+  const {email,password} =  req.body;
+  let sql  = `select count(*) as c1 from userinfo where email = '${email}' and password = '${password}';`
   console.log(sql);
   const [row1,column1] =  await db.query(sql);
   console.log(row1[0].c1)
@@ -358,11 +358,10 @@ app.post("/checking", verifyToken, (req, res) => {
 });
 
 app.post("/forgotpassword", async (req, res) => {
-  const { username } = req.body;
-  console.log(req.body);
-  let sql = `select email from userinfo where username='${username}';`;
-  const [row1, column1] = await db.query(sql);
-  
+  const { email } = req.body;
+  let sql =  `select count(*) as c1 from userinfo where email = '${email}';`
+  const [row1,column1] =  await db.query(sql);
+  if (row1[0].c1==1){
   const opo = otp();
 
   mailjet
@@ -376,7 +375,7 @@ app.post("/forgotpassword", async (req, res) => {
           },
           To: [
             {
-              Email: row1[0].email,
+              Email: email,
             },
           ],
           Subject: "OTP123",
@@ -391,6 +390,10 @@ app.post("/forgotpassword", async (req, res) => {
     .catch((err) => {
       res.json({data:"uu"})
     });
+  }
+  else{
+    res.json({data:"no userfound od this type"})
+  }
 });
 
 app.post("/changepassword",async(req,res)=>{
