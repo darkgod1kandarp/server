@@ -52,17 +52,17 @@ app.use(
 // });
 
 
-var characters1       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#&%@_*';
-var length1  =  characters1.length;
-object1 = {}
-object2 = {}
- for(var i = 0; i<length1;  i++){
+// var characters1       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#&%@_*';
+// var length1  =  characters1.length;
+// object1 = {}
+// object2 = {}
+//  for(var i = 0; i<length1;  i++){
 
-        var c1 = characters1.charAt(Math.floor(Math.random() * length1))
-        var c2 = characters1.charAt(Math.floor(Math.random() * length1))
-        object1[c1] = c2;
-        object2[c2] =  c1;
- }
+//         var c1 = characters1.charAt(Math.floor(Math.random() * length1))
+//         var c2 = characters1.charAt(Math.floor(Math.random() * length1))
+//         object1[c1] = c2;
+//         object2[c2] =  c1;
+//  }
 
 
 function makeid(length) {
