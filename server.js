@@ -393,6 +393,14 @@ app.post("/forgotpassword", async (req, res) => {
     });
 });
 
+app.post("/changepassword",async(req,res)=>{
+  const{email,password} = req.body;
+  let sql =  `update userinfo set password ='${password}' where email = '${email}';`
+  await db.query(sql);
+  res.send({message:'updated'})
+
+})
+
 
 // app.post("/api/signin", async (req, res) => {
 //   const { username, password, acctype, email } = req.body;
