@@ -360,9 +360,9 @@ app.post("/checking", verifyToken, (req, res) => {
 app.post("/forgotpassword", async (req, res) => {
   const { username } = req.body;
   console.log(req.body);
-  let sql = `select email from userdetails where name='${username}';`;
+  let sql = `select email from userinfo where username='${username}';`;
   const [row1, column1] = await db.query(sql);
-
+  
   const opo = otp();
 
   mailjet
@@ -372,7 +372,7 @@ app.post("/forgotpassword", async (req, res) => {
         {
           From: {
             Email: "rushabh.s1@ahduni.edu.in",
-            Name: "your-application-name",
+            Name: "carvan",
           },
           To: [
             {
@@ -380,7 +380,7 @@ app.post("/forgotpassword", async (req, res) => {
             },
           ],
           Subject: "OTP123",
-          TextPart: opo,
+          TextPart: `your otp is ${opo}`,
         },
       ],
     })
