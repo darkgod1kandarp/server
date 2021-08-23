@@ -18,6 +18,10 @@ var mailjet = require("node-mailjet").connect(
   "7a92a782bec6c95b4938cffe0dcafbc7",
   "8834329e09ddf2c22105a769843ab089"
 );
+// student ,subject matter expert , recruiter 
+
+// area - 
+
 
 const otp = () => {
   let data = "";
@@ -363,7 +367,6 @@ app.post("/forgotpassword", async (req, res) => {
   const [row1,column1] =  await db.query(sql);
   if (row1[0].c1==1){
   const opo = otp();
-
   mailjet
     .post("send", { version: "v3.1" })
     .request({
