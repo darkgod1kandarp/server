@@ -330,6 +330,60 @@ app.post("/signup",async(req,res)=>{
    }
 })  
 
+app.post("/profile",async(req,res)=>{
+  const {userid, typeofaccount,location,collegeName} =  req.body;
+
+  let sql;
+  sql = `insert into user_account_details values('${userid}','${typeofaccount}','${location}',,'${collegeName}');`
+  await db.query(sql);
+  if (typeofaccount==="student"){
+    const {startYear,lastYear,skills_already,skills_demanded} =  req.body;
+    sql =  `insert into student_account values('${userid}','${startYear}','${lastYear}');`
+    await db.query(sql);
+    sql = `insert into skills_already_have(skills,userid1) values (('${userid}',`
+    random+=skills_already.join(`,${userid}),`)
+    sql+=random
+    sql+=`,${userid}))`
+    await db.query(sql);
+    
+    sql = `insert into skills_demand(skills,userid1) values (('${userid}',`
+    random+=skills_demanded.join(`,${userid}),`)
+    sql+=random
+    sql+=`,${userid}))`
+    await db.query(sql);
+
+
+  }
+  else if(typeofaccount==="recuriter"){
+     const {subject ,experience,coursetosell,subject,coursetosell} =req.body;
+
+     sql =  `insert into student_account values('${userid}','0','${experience}');`
+    await db.query(sql);
+    sql = `insert into skills_already_have(skills,userid1) values (('${userid}',`
+    random+=subject.join(`,${userid}),`)
+    sql+=random
+    sql+=`,${userid}))`
+    await db.query(sql);
+    
+    sql = `insert into skills_demand(skills,userid1) values (('${userid}',`
+    random+=coursetosell.join(`,${userid}),`)
+    sql+=random
+    sql+=`,${userid}))`
+    await db.query(sql);
+
+    
+
+  }
+  else{
+
+    const {lowest_price,start_price} = req.body;
+    sql=`insert into skills_recuriter_needed values('${userid}',${lowest_price},${start_price});`
+    await db.query(sql);
+
+  }
+
+})
+
 app.post("/signin",async(req,res)=>{
   const {email,password} =  req.body;
   let sql  = `select count(*) as c1 from userinfo where email = '${email}' and password = '${password}';`
