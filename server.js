@@ -47,6 +47,7 @@ app.use(
 
 var cloudinary = require("cloudinary").v2;
 const Address = require("ipaddr.js");
+const { language } = require("google-distance-matrix");
 cloudinary.config({
   cloud_name: "ur-cirkle",
   api_key: "858755792955291",
@@ -342,7 +343,7 @@ app.post("/profile", async (req, res) => {
     await db.query(sql);
 
   } else if (typeofaccount === "subjme") {
-    const { subject, experience, coursetosell,jobs} = req.body;
+    const { subject, experience, coursetosell,interest} = req.body;
     sql = `insert into student_account values('${userid}','0','${experience}');`;
     await db.query(sql);
     sql = `insert into skills_already_have values `;
@@ -363,28 +364,35 @@ app.post("/profile", async (req, res) => {
   
     await db.query(sql);
    d = []
-   sql = `insert into jobs values `;
+   sql = `insert into jobs_required values `;
     for(x of jobs){
       d.push(`('${userid}','${x}')`);
     }
     sql += d.join(",");
   
     await db.query(sql);
+
     
 
   } else {
-    const { lowest_price, start_price ,jobs} = req.body;
-    sql = `insert into skills_recuriter_needed values('${userid}',${lowest_price},${start_price});`;
-    await db.query(sql);
-    sql =  `insert into jobs values ('${userid}','${jobs}');`
+    const {jobInstance,jobLanguage} = req.body;
+    
+    sql =  `insert into jobs values`
     d = []
-    sql = `insert into jobs values `;
-     for(x of jobs){
-       d.push(`('${userid}','${x}')`);
+    sql = `insert into jobs_taken_account values `;
+    const uuid2 = makeid(11);
+     for(x of jobInstance){
+       d.push(`('${userid}','${uuid2}','${x.job}','${x.startSalary}','${endSalary}')`);
      }
-     sql += d.join(",");
-   
-     await db.query(sql);
+    sql += d.join(",");
+    sql = `insert into jobs_language values `;
+    d = []
+    for(x of jobLanguage){
+      d.push(`('${uuid2}','${language}')`);
+    }
+    sql += d.join(",");
+    await db.query(sql);
+
   }
   
 });
