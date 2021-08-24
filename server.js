@@ -6,10 +6,9 @@ const app = express();
 const mysql = require("mysql2");
 const distance = require("google-distance-matrix");
 distance.key("AIzaSyCejofxtxXDqgb1_xYwkgZy06mF-VNa15Q");
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 
-
-app.use(cors());  
+app.use(cors());
 // let bodyParser = require('body-parser');
 // app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: true }));
@@ -18,10 +17,9 @@ var mailjet = require("node-mailjet").connect(
   "7a92a782bec6c95b4938cffe0dcafbc7",
   "8834329e09ddf2c22105a769843ab089"
 );
-// student ,subject matter expert , recruiter 
+// student ,subject matter expert , recruiter
 
-// area - 
-
+// area -
 
 const otp = () => {
   let data = "";
@@ -47,14 +45,13 @@ app.use(
   })
 );
 
-// var cloudinary = require("cloudinary").v2;
-// const Address = require("ipaddr.js");
-// cloudinary.config({
-//   cloud_name: "ur-cirkle",
-//   api_key: "858755792955291",
-//   api_secret: "7Tin6b3Em8ThMYGHLWvyNBPzXRk",
-// });
-
+var cloudinary = require("cloudinary").v2;
+const Address = require("ipaddr.js");
+cloudinary.config({
+  cloud_name: "ur-cirkle",
+  api_key: "858755792955291",
+  api_secret: "7Tin6b3Em8ThMYGHLWvyNBPzXRk",
+});
 
 // var characters1       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#&%@_*';
 // var length1  =  characters1.length;
@@ -68,28 +65,25 @@ app.use(
 //         object2[c2] =  c1;
 //  }
 
-
 function makeid(length) {
-  var result           = '';
-  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
- 
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
   var charactersLength = characters.length;
-  for ( var i = 0; i < length; i++ ) {
-    result += characters.charAt(Math.floor(Math.random() * 
-charactersLength));
- }
- return result;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 }
 
-
-
 const pool = mysql.createPool({
-  host: "163.123.183.88", 
+  host: "163.123.183.88",
   database: "kandarp",
   user: "admin",
   password: "2OtCm0bY",
-  port: "17387"
-});  
+  port: "17387",
+});
 
 const db = pool.promise();
 
@@ -99,12 +93,12 @@ const db = pool.promise();
 // }
 // checking();
 // console.log(db);
-// const StoringOnCloud = (dataURI) => {
-//   cloudinary.uploader.upload(dataURI, (err, result) => {
-//     console.log(result.url, 1241);
-//     return result.url;
-//   });
-// };
+const StoringOnCloud = (dataURI) => {
+  cloudinary.uploader.upload(dataURI, (err, result) => {
+    console.log(result.url, 1241);
+    return result.url;
+  });
+};
 // const firing = (refineddata, refinedpgid, origins, destinations) => {
 //   distance.matrix(origins, destinations, function (err, distances) {
 //     if (distances.status == "OK") {
@@ -121,28 +115,25 @@ const db = pool.promise();
 //   });
 // };
 
-
-
 // app.get("/api/verificationpg",async(req,res)=>{
 
 //   let sql = `select * from verified ,pgbasicdetails,ownerdetails where verfied  = 0 and  verified.pgid =pgbasicdetails.pgid and pgbasicdetails.name1 = ownerdetails.name1;`
 //   let [verifiedone , column2] =  await db.query(sql);
-//   console.log(verifiedone);   
-//   res.json({data:verifiedone});   
-        
-    
-// })    
+//   console.log(verifiedone);
+//   res.json({data:verifiedone});
+
+// })
 
 // app.post("/api/dataremoving",async(req,res)=>{
 //   const {id} = req.body;
 //   sql = `update verified set verfied = 1 where pgid='${id}'`
 //   let [row1, column1] = await db.query(sql);
 //   res.json({data:"successfully done"})
-// })  
+// })
 
 // app.post("/api/query",async(req,res)=>{
 //   const {available,bedrooms,location,max_area,max_budget,min_area,min_budget,service,sharing} = req.body;
-  
+
 //   let sql =`select * from verified ,pgbasicdetails,ownerdetails  where verified.pgid =pgbasicdetails.pgid and pgbasicdetails.name1 = ownerdetails.name1 and availability  in (?)  and  roomsforrent in (?) and ${min_budget}<=costperbed<=${max_budget} and sharing in (?) and ${min_area}<=plotsize<=${max_area};`
 
 //   let [data,column1] =  await db.query(sql,[available,bedrooms,sharing]);
@@ -151,24 +142,24 @@ const db = pool.promise();
 //     for(x in data){
 //       const destinations = [`${data[x].lat},${data[x].lng}`]
 //     distance.matrix(origins, destinations, function (err, distances) {
-      
+
 //       if (distances.status == "OK") {
 //         if (distances.rows[0].elements[0].status == "OK") {
 //           var distance = distances.rows[0].elements[0].distance.text;
 //           let array1 = distance.split(" ");
 //           let distanceint = Number(array1[0]);
-                  
-//           if (distanceint < 150) {               
+
+//           if (distanceint < 150) {
 //             console.log(distanceint,123);
 //           }
 //         }
-//       }   
+//       }
 //     });
 //   }
 
 //   })
 //   res.json({data:"ekefkef"})
-// })   
+// })
 
 // app.post("/api/carddata", async (req, res) => {
 //   const { city, lat, lon } = req.body;
@@ -180,41 +171,41 @@ const db = pool.promise();
 //   let data = {};
 //  row1.map((x)=> {
 //     const destinations = [`${x.lat},${x.lng}`];
-    
+
 //     distance.matrix(origins, destinations, function (err, distances) {
-      
+
 //       if (distances.status == "OK") {
 //         if (distances.rows[0].elements[0].status == "OK") {
 //           var distance = distances.rows[0].elements[0].distance.text;
 //           let array1 = distance.split(" ");
 //           let distanceint = Number(array1[0]);
-                  
-//           if (distanceint < 150) {     
+
+//           if (distanceint < 150) {
 //             console.log(x,123);
 //             refinedpgid.push(x.pgid);
 //             data = { ...data, [x.pgid]: x };
 //             console.log(refinedpgid)
 //           }
 //         }
-//       }   
+//       }
 //     });
 //   }
 //  )
-  
-//   setTimeout(async () => {  
-    
+
+//   setTimeout(async () => {
+
 //     for (x in refinedpgid) {
 //       sql = `select rule from ruleforpg where pgid  ='${refinedpgid[x]}'`;
 //       console.log(sql);
 //       let [row1, column1] = await db.query(sql);
 //       console.log(row1);
 //       data[refinedpgid[x]] = { ...data[refinedpgid[x]], rule: row1 };
-//       sql = `select imgurl,description from imagesdata where pgid ='${refinedpgid[x]}'`;      
+//       sql = `select imgurl,description from imagesdata where pgid ='${refinedpgid[x]}'`;
 //       let [row2, column2] = await db.query(sql);
 //       data[refinedpgid[x]] = { ...data[refinedpgid[x]], url: row2 };
 //       sql = `select service from services where pgid ='${refinedpgid[x]}'`;
 //       let [row3, column3] = await db.query(sql);
-//       data[refinedpgid[x]] = { ...data[refinedpgid[x]], services: row3 };   
+//       data[refinedpgid[x]] = { ...data[refinedpgid[x]], services: row3 };
 //     }
 //     setTimeout(() => {
 //       res.json({ data });
@@ -255,9 +246,9 @@ const db = pool.promise();
 //     rule,
 //     service,
 //     sharing,
-//     lat,   
+//     lat,
 //     lng,
-//     pgid,  
+//     pgid,
 //   } = req.body;
 //   let sql = `insert into pgbasicdetails values ('${username}','${address}','${avaibility}','${roomsForRent}','${sharing}','${flatName}','${pgid}','${maximumCapacity}',${lat},${lng},${PlotArea},${costPerBed});`;
 //   console.log(sql, 213);
@@ -270,30 +261,29 @@ const db = pool.promise();
 //     console.log(imgData1[`${i}`]);
 //     await cloudinary.uploader.upload(imgList1[i], async (err, result) => {
 //       if(!err){
-//         console.log(err);  
-      
+//         console.log(err);
+
 //       sql = `insert into imagesdata values('${pgid}','${result.url}','${
-//         imgData1[`${i}`]       
+//         imgData1[`${i}`]
 //       }');`;
 //       console.log(sql);
 //       await db.query(sql);
 //     }
 //     });
-//   }  
+//   }
 //   for (let j = 0; j < rule1.length; j++) {
 //     console.log(rule1);
 //     sql = `insert into ruleforpg values('${pgid}','${rule1[j]}');`;
 //     await db.query(sql);
 //   }
 //   for (let k in service) {
-   
+
 //     sql = `insert into services values('${pgid}','${service[k]}');`;
 //     await db.query(sql);
 //   }
-  
+
 //   sql = `insert into verified values('${pgid}',0)`
 //   await db.query(sql);
-         
 
 //   res.json({
 //     message: "send successfully",
@@ -302,107 +292,117 @@ const db = pool.promise();
 
 app.get("/jwttoken", (req, res) => {
   // Mock user
-  
 
-  jwt.sign( {},"secretkey", (err, token) => {
+  jwt.sign({}, "secretkey", (err, token) => {
     res.json({
       token,
     });
   });
 });
 
-  
+app.post("/signup", async (req, res) => {
+  const { username, email, password } = req.body;
+  const uuid1 = makeid(11);
+  let sql = `  select checking1('${uuid1}','${username}','${email}','${password}') as c1;`;
 
-app.post("/signup",async(req,res)=>{
+  const [row1] = await db.query(sql);
 
-   const {username ,email,password} = req.body;
-   const uuid1 = makeid(11)
-   let sql = `  select checking1('${uuid1}','${username}','${email}','${password}') as c1;`
-   
+  if (row1[0].c1 === 1) {
+    res.json({ message: "alva" });
+  } else {
+    res.json({ message: "nalva", data: `${uuid1}` });
+  }
+});
 
-   const [row1] =  await db.query(sql);
-  
-   if(row1[0].c1===1){
-    res.json({message:"alva"})
-   }
-   else{
-    res.json({message:"nalva",data:`${uuid1}`})
-   }
-})  
-
-app.post("/profile",async(req,res)=>{
-  const {userid, typeofaccount,location,collegeName} =  req.body;
-
+app.post("/profile", async (req, res) => {
+  const { userid, typeofaccount, location, collegeName,userimage ,inter} = req.body;
+  const link = StoringOnCloud(dataURI);
   let sql;
-  sql = `insert into user_account_details values('${userid}','${typeofaccount}','${location}',,'${collegeName}');`
+  sql = `insert into user_account_details value('${userimage}','${typeofaccount}','${location}','${collegeName}','${link}');`;
   await db.query(sql);
-  if (typeofaccount==="student"){
-    const {startYear,lastYear,skills_already,skills_demanded} =  req.body;
-    sql =  `insert into student_account values('${userid}','${startYear}','${lastYear}');`
+  if (typeofaccount === "student") {
+    const { startYear, lastYear, skills_already, skills_demanded } = req.body;
+    sql = `insert into student_account values('${userid}','${startYear}','${lastYear}');`;
     await db.query(sql);
-    sql = `insert into skills_already_have(skills,userid1) values (('${userid}',`
-    random+=skills_already.join(`,${userid}),`)
-    sql+=random
-    sql+=`,${userid}))`
+    sql = `insert into skills_already_have values `;
+    var x;
+    d = [];
+    for (x of skills_already) {
+      d.push(`('${userid}','${x}')`);
+    }
+    sql += d.join(",");
+    await db.query(sql);
+    sql = `insert into skills_demand values `;
+    var x;
+    d = [];
+    for (x of skills_demanded) { 
+      d.push(`('${userid}','${x}')`);
+    }
+    sql += d.join(",");
+    await db.query(sql);
+
+  } else if (typeofaccount === "subjme") {
+    const { subject, experience, coursetosell,jobs} = req.body;
+    sql = `insert into student_account values('${userid}','0','${experience}');`;
+    await db.query(sql);
+    sql = `insert into skills_already_have values `;
+    var x;
+    d = [];
+    for (x of subject) {
+      d.push(`('${userid}','${x}')`);
+    }
+    sql += d.join(",");
+    await db.query(sql);
+    sql = `insert into skills_demand values `;
+    var x;
+    d = [];
+    for (x of coursetosell) {
+      d.push(`('${userid}','${x}')`);
+    }
+    sql += d.join(",");
+  
+    await db.query(sql);
+   d = []
+   sql = `insert into jobs values `;
+    for(x of jobs){
+      d.push(`('${userid}','${x}')`);
+    }
+    sql += d.join(",");
+  
     await db.query(sql);
     
-    sql = `insert into skills_demand(skills,userid1) values (('${userid}',`
-    random+=skills_demanded.join(`,${userid}),`)
-    sql+=random
-    sql+=`,${userid}))`
+
+  } else {
+    const { lowest_price, start_price ,jobs} = req.body;
+    sql = `insert into skills_recuriter_needed values('${userid}',${lowest_price},${start_price});`;
     await db.query(sql);
-
-
+    sql =  `insert into jobs values ('${userid}','${jobs}');`
+    d = []
+    sql = `insert into jobs values `;
+     for(x of jobs){
+       d.push(`('${userid}','${x}')`);
+     }
+     sql += d.join(",");
+   
+     await db.query(sql);
   }
-  else if(typeofaccount==="recuriter"){
-     const {subject ,experience,coursetosell,subject,coursetosell} =req.body;
+  
+});
 
-     sql =  `insert into student_account values('${userid}','0','${experience}');`
-    await db.query(sql);
-    sql = `insert into skills_already_have(skills,userid1) values (('${userid}',`
-    random+=subject.join(`,${userid}),`)
-    sql+=random
-    sql+=`,${userid}))`
-    await db.query(sql);
-    
-    sql = `insert into skills_demand(skills,userid1) values (('${userid}',`
-    random+=coursetosell.join(`,${userid}),`)
-    sql+=random
-    sql+=`,${userid}))`
-    await db.query(sql);
-
-    
-
-  }
-  else{
-
-    const {lowest_price,start_price} = req.body;
-    sql=`insert into skills_recuriter_needed values('${userid}',${lowest_price},${start_price});`
-    await db.query(sql);
-
-  }
-
-})
-
-app.post("/signin",async(req,res)=>{
-  const {email,password} =  req.body;
-  let sql  = `select count(*) as c1 from userinfo where email = '${email}' and password = '${password}';`
+app.post("/signin", async (req, res) => {
+  const { email, password } = req.body;
+  let sql = `select count(*) as c1 from userinfo where email = '${email}' and password = '${password}';`;
   console.log(sql);
-  const [row1,column1] =  await db.query(sql);
-  console.log(row1[0].c1)
-  if(row1[0].c1===0){
-     res.json({message:'nuf'})
-  }
-  else{
+  const [row1, column1] = await db.query(sql);
+  console.log(row1[0].c1);
+  if (row1[0].c1 === 0) {
+    res.json({ message: "nuf" });
+  } else {
     res.json({
-      message:'uf'
-    })
+      message: "uf",
+    });
   }
-})
-
-
-
-
+});
 
 app.post("/checking", verifyToken, (req, res) => {
   jwt.verify(req.token, "secretkey", async (err, authData) => {
@@ -417,50 +417,46 @@ app.post("/checking", verifyToken, (req, res) => {
 
 app.post("/forgotpassword", async (req, res) => {
   const { email } = req.body;
-  let sql =  `select count(*) as c1 from userinfo where email = '${email}';`
-  const [row1,column1] =  await db.query(sql);
-  if (row1[0].c1==1){
-  const opo = otp();
-  mailjet
-    .post("send", { version: "v3.1" })
-    .request({
-      Messages: [
-        {
-          From: {
-            Email: "rushabh.s1@ahduni.edu.in",
-            Name: "carvan",
-          },
-          To: [
-            {
-              Email: email,
+  let sql = `select count(*) as c1 from userinfo where email = '${email}';`;
+  const [row1, column1] = await db.query(sql);
+  if (row1[0].c1 == 1) {
+    const opo = otp();
+    mailjet
+      .post("send", { version: "v3.1" })
+      .request({
+        Messages: [
+          {
+            From: {
+              Email: "rushabh.s1@ahduni.edu.in",
+              Name: "carvan",
             },
-          ],
-          Subject: "OTP123",
-          TextPart: `your otp is ${opo}`,
-        },
-      ],
-    })
-    .then((result) => {
-    
-      res.json({ data: opo });
-    })
-    .catch((err) => {
-      res.json({data:"uu"})
-    });
-  }
-  else{
-    res.json({data:"no userfound od this type"})
+            To: [
+              {
+                Email: email,
+              },
+            ],
+            Subject: "OTP123",
+            TextPart: `your otp is ${opo}`,
+          },
+        ],
+      })
+      .then((result) => {
+        res.json({ data: opo });
+      })
+      .catch((err) => {
+        res.json({ data: "uu" });
+      });
+  } else {
+    res.json({ data: "no userfound od this type" });
   }
 });
 
-app.post("/changepassword",async(req,res)=>{
-  const{email,password} = req.body;
-  let sql =  `update userinfo set password ='${password}' where email = '${email}';`
+app.post("/changepassword", async (req, res) => {
+  const { email, password } = req.body;
+  let sql = `update userinfo set password ='${password}' where email = '${email}';`;
   await db.query(sql);
-  res.send({message:'updated'})
-
-})
-
+  res.send({ message: "updated" });
+});
 
 // app.post("/api/signin", async (req, res) => {
 //   const { username, password, acctype, email } = req.body;
@@ -519,7 +515,7 @@ app.post("/changepassword",async(req,res)=>{
 //   });
 
 //   let sql = `select pgfinder.checking1('${username}', '${password}','${acctype}','${email}') as c1;`;
-//   let [row1, column1] = await db.query(sql);  
+//   let [row1, column1] = await db.query(sql);
 
 //   if (row1[0].c1 == 0) {
 //     console.log(1234);
@@ -538,7 +534,6 @@ app.post("/changepassword",async(req,res)=>{
 //   const [row1, column1] = await db.query(sql);
 //   res.json({ data: "updated" });
 // });
-
 
 // app.post("/api/homepage", verifyToken, async (req, res) => {
 //   jwt.verify(req.token, "secretkey", async (err, authData) => {
