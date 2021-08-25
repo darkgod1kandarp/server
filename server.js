@@ -66,7 +66,7 @@ cloudinary.config({
 //         object2[c2] =  c1;
 //  }
 
-function makeid(length) {
+function makeid (length) {
   var result = "";
   var characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -319,8 +319,8 @@ app.post("/signup", async (req, res) => {
 app.post("/profile", async (req, res) => {
   const { userid, typeofaccount, location, collegeName, userimage } =
     req.body;
-  // const link = StoringOnCloud(userimage);
-  const link = userimage;
+  const link = StoringOnCloud(userimage);
+  // console.log(userimage)
   let sql;
   sql = `insert into user_account_details value('${userid}','${typeofaccount}','${location}','${collegeName}','${link}');`;
   await db.query(sql);
@@ -335,6 +335,7 @@ app.post("/profile", async (req, res) => {
       d.push(`('${userid}','${x}')`);
     }
     sql += d.join(",");
+    print(sql)
     await db.query(sql);
     sql = `insert into skills_demand values `;
     var x;
@@ -374,23 +375,26 @@ app.post("/profile", async (req, res) => {
 
     await db.query(sql);
   } else {
-    const { jobInstance, jobLanguage } = req.body;
+    const { jobInstance } = req.body;
     sql = `insert into jobs values`;
     d = [];
     sql = `insert into jobs_taken_account values `;
     const uuid2 = makeid(11);
-    console.log(uuid2);
+    console.log(uuid2,123);
     for (x of jobInstance) {
       d.push(
-        `('${userid}','${uuid2}','${x.job}','${x.startSalary}','${x.endSalary}')`
+        `('${userid}','${x.uuid1}','${x.job}','${x.startSalary}','${x.endSalary}')`
       );
     }
           
     sql += d.join(",");
     sql = `insert into jobs_language values `;
     d = [];
-    for (x of jobLanguage) {
-      d.push(`('${uuid2}','${x}')`);
+    let p;
+    for (x of jobInstance) {
+      for( p of x.language){
+      d.push(`('${x.uuid1}','${p}')`);
+      }
     }
     sql += d.join(",");
     console.log(sql);
