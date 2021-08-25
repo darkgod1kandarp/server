@@ -96,7 +96,8 @@ const db = pool.promise();
 // console.log(db);
 const StoringOnCloud = (dataURI) => {
   cloudinary.uploader.upload(dataURI, (err, result) => {
-    console.log(result.url, 1241);
+    console.log(err)
+    if (err)return err;
     return result.url;
   });
 };
@@ -316,10 +317,12 @@ app.post("/signup", async (req, res) => {
 });
 
 app.post("/profile", async (req, res) => {
-  const { userid, typeofaccount, location, collegeName,userimage ,inter} = req.body;
-  const link = StoringOnCloud(dataURI);
+  const { userid, typeofaccount, location, collegeName, userimage } =
+    req.body;
+  // const link = StoringOnCloud(userimage);
+  const link = userimage;
   let sql;
-  sql = `insert into user_account_details value('${userimage}','${typeofaccount}','${location}','${collegeName}','${link}');`;
+  sql = `insert into user_account_details value('${userid}','${typeofaccount}','${location}','${collegeName}','${link}');`;
   await db.query(sql);
   if (typeofaccount === "student") {
     const { startYear, lastYear, skills_already, skills_demanded } = req.body;
@@ -336,14 +339,13 @@ app.post("/profile", async (req, res) => {
     sql = `insert into skills_demand values `;
     var x;
     d = [];
-    for (x of skills_demanded) { 
+    for (x of skills_demanded) {
       d.push(`('${userid}','${x}')`);
     }
     sql += d.join(",");
     await db.query(sql);
-
   } else if (typeofaccount === "subjme") {
-    const { subject, experience, coursetosell,interest} = req.body;
+    const { subject, experience, coursetosell, jobrequired } = req.body;
     sql = `insert into student_account values('${userid}','0','${experience}');`;
     await db.query(sql);
     sql = `insert into skills_already_have values `;
@@ -361,40 +363,40 @@ app.post("/profile", async (req, res) => {
       d.push(`('${userid}','${x}')`);
     }
     sql += d.join(",");
-  
+
     await db.query(sql);
-   d = []
-   sql = `insert into jobs_required values `;
-    for(x of jobs){
+    d = [];
+    sql = `insert into jobs_required values `;
+    for (x of jobrequired) {
       d.push(`('${userid}','${x}')`);
     }
     sql += d.join(",");
-  
+
     await db.query(sql);
-
-    
-
   } else {
-    const {jobInstance,jobLanguage} = req.body;
-    
-    sql =  `insert into jobs values`
-    d = []
+    const { jobInstance, jobLanguage } = req.body;
+    sql = `insert into jobs values`;
+    d = [];
     sql = `insert into jobs_taken_account values `;
     const uuid2 = makeid(11);
-     for(x of jobInstance){
-       d.push(`('${userid}','${uuid2}','${x.job}','${x.startSalary}','${endSalary}')`);
-     }
+    console.log(uuid2);
+    for (x of jobInstance) {
+      d.push(
+        `('${userid}','${uuid2}','${x.job}','${x.startSalary}','${x.endSalary}')`
+      );
+    }
+          
     sql += d.join(",");
     sql = `insert into jobs_language values `;
-    d = []
-    for(x of jobLanguage){
-      d.push(`('${uuid2}','${language}')`);
+    d = [];
+    for (x of jobLanguage) {
+      d.push(`('${uuid2}','${x}')`);
     }
     sql += d.join(",");
+    console.log(sql);
     await db.query(sql);
-
   }
-  
+  return res.send({data:"send"})
 });
 
 app.post("/signin", async (req, res) => {
