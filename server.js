@@ -88,6 +88,7 @@ io.on("connection", async(socket) => {
   socket.on("connected", async(data) => {
    
     const{userid} = data;
+    console.log(userid,12)
 
      id =  socket.id;
       let sql  =  `update socketid set userid1 = '${userid}' where ids = '${id}';`
@@ -96,17 +97,19 @@ io.on("connection", async(socket) => {
 
   socket.on("post",async(data)=>{
     const{userid,image,text_des,title}=data;
-    let url;
-    console.log(data);
     
+    let sql;
+    sql =  `select username from userinfo where userid1 = '${userid}';`
+    const[naming,column5] =  await db.query(sql);
+    const name =  naming[0].username
     cloudinary.uploader.upload(image, async(err, result) => {
     if (err) return err;
     const url = result.url;
-    sql =`insert into post values('${userid}','${title}','${text_des}','${url}')`
+    sql =`insert into post values('${userid}','${title}','${text_des}','${url}',current_timestamp);`
     await db.query(sql); 
     });
-    const dataSending ={image,text_des,title}
-    let sql =`select * from  connection_people where connector = '${userid}' or connecting = '${userid}' and sided = 1;`
+    const dataSending ={image,text_des,title,name}
+    sql =`select * from  connection_people where connector = '${userid}' or connecting = '${userid}' and sided = 1;`
     const[row1,column1] =  await db.query(sql);
     console.log(row1);
     var flipFlop = []
@@ -122,6 +125,8 @@ io.on("connection", async(socket) => {
     
     const[row2,column2] =  await db.query(sql,[myArr]);
     for (let x of row2){
+      
+     console.log(x.ids,"wer")
       io.to(x.ids).emit("sendingData",dataSending)
     }
   }
@@ -134,9 +139,9 @@ socket.on("connectingUser",async(data)=>{
    console.log(data)
    let sql = `select count(*) as c1 from connection_people where (connector = '${connector}'and connecting = '${connecting}') or (connector = '${connecting}'and connecting = '${connector}');`
    const [counting,column4] =  await db.query(sql);
-   console.log(counting);
+   console.log(counting,'12124');
    if (counting[0].c1===0){
-   sql =`insert into connection_people values('${connector}','${connecting}',0);`
+   sql =`insert into connection_people values('${connector}','${connecting}',0,current_timestamp);`
    await db.query(sql);
    sql = `select * from socketid where userid1 = '${connecting}';`
    const[row1,column1] = await db.query(sql);
@@ -156,9 +161,8 @@ socket.on("connectingUser",async(data)=>{
    sql = `select username from userinfo where userid1 = '${connector}';`
    const[row2,column2] = await db.query(sql);
    const sendingData = {name:row2[0].userid1,msg:"stm"}
-   
    for(let x of row1){
-    io.to(x.ids).emit("sendingData",sendingData)
+    io.to(x.ids).emit("sendingData",sendingData);
    }
   }
 
