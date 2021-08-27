@@ -97,6 +97,7 @@ io.on("connection", async(socket) => {
   socket.on("post",async(data)=>{
     const{userid,image,text_des,title}=data;
     let url;
+    console.log(data);
     
     cloudinary.uploader.upload(image, async(err, result) => {
     if (err) return err;
@@ -109,6 +110,7 @@ io.on("connection", async(socket) => {
     const[row1,column1] =  await db.query(sql);
     console.log(row1);
     var flipFlop = []
+    if (row1.length!==0){
     for (let x of row1){
       flipFlop.push(x.connector);
       flipFlop.push(x.connecting);
@@ -120,10 +122,9 @@ io.on("connection", async(socket) => {
     
     const[row2,column2] =  await db.query(sql,[myArr]);
     for (let x of row2){
-      console.log(x.ids);
       io.to(x.ids).emit("sendingData",dataSending)
     }
-
+  }
    
     
   })
