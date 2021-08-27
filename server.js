@@ -73,13 +73,13 @@ const pool = mysql.createPool({
 
 const db = pool.promise();
 
-const StoringOnCloud = (dataURI) => {
+
   cloudinary.uploader.upload(dataURI, (err, result) => {
     console.log(err);
     if (err) return err;
     return result.url;
   });
-};
+
 
 app.get("/jwttoken", (req, res) => {
   // Mock user
@@ -122,7 +122,6 @@ io.on("connection", async(socket) => {
 
   socket.on("post",async(data)=>{
     const{userid,image,text_des,title}=data;
-    const url  = StoringOnCloud(image);
     const dataSending ={image,text_des,title}
     let sql =`select * from  connection_people where connector = '${userid}' or connecting = '${userid}';`
     const[row1,column1] =  await db.query(sql);
@@ -143,9 +142,17 @@ io.on("connection", async(socket) => {
       io.to(x.ids).emit("sendingData",dataSending)
     }
 
-    sql = `insert into post values('${userid}','${title}','${text_des}','${url}');`
 
-    await db.query(sql);
+
+    
+    
+    // let sql = `select * from socketid where userid1 = '${userid}'; `
+    // const [row1,column1] =  await db.query(sql);
+    // console.log(row1)
+    // for (let x of row1){
+    //   io.to(x.ids).emit("data",data);
+
+    // }
   })
 
 socket.on("disconnect",async(data)=>{
@@ -156,21 +163,28 @@ socket.on("disconnect",async(data)=>{
   })
 
 });
-app.post('/userprofile',async(data)=>{
-  const {userid} = data;
-  let sql = `select username,email from userinfo,user_account_details where userid = '${userid}';`
+app.post('/userprofile',async(req,res)=>{
+  const {userid} = req.body;
+  let sql = `select username,email,type_account,university_name,location from userinfo,user_account_details where userinfo.userid1 = '${userid}' and user_account_details.userid1='${userid}'  ;`
+  console.log(sql)
   const [row1,column1] = await db.query(sql);
-  res.send({data:row1})
+  console.log(row1)
+  return res.send(row1)
 })
 // toshi@explified.com
 //kushal@explified.com
 app.post("/profile", async (req, res) => {
   const { userid, typeofaccount, location, collegeName, userimage } = req.body;
-  const link = StoringOnCloud(userimage);
-  // console.log(userimage)
   let sql;
-  sql = `insert into user_account_details value('${userid}','${typeofaccount}','${location}','${collegeName}','${link}');`;
+  
+  cloudinary.uploader.upload(userimage, async(err, result) => {
+    if (err) return err;
+    sql = `insert into user_account_details value('${userid}','${typeofaccount}','${location}','${collegeName}','${result.url}');`;
   await db.query(sql);
+    
+  });
+
+  
   if (typeofaccount === "student") {
     const { startYear, lastYear, skills_already, skills_demanded } = req.body;
     sql = `insert into student_account values('${userid}','${startYear}','${lastYear}');`;
@@ -182,7 +196,7 @@ app.post("/profile", async (req, res) => {
       d.push(`('${userid}','${x}')`);
     }
     sql += d.join(",");
-    print(sql);
+  
     await db.query(sql);
     sql = `insert into skills_demand values `;
     var x;
