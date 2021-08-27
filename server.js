@@ -122,6 +122,7 @@ io.on("connection", async(socket) => {
 
   socket.on("post",async(data)=>{
     const{userid,image,text_des,title}=data;
+    const url  = StoringOnCloud(image);
     const dataSending ={image,text_des,title}
     let sql =`select * from  connection_people where connector = '${userid}' or connecting = '${userid}';`
     const[row1,column1] =  await db.query(sql);
@@ -142,17 +143,9 @@ io.on("connection", async(socket) => {
       io.to(x.ids).emit("sendingData",dataSending)
     }
 
+    sql = `insert into post values('${userid}','${title}','${text_des}','${url}');`
 
-
-    
-    
-    // let sql = `select * from socketid where userid1 = '${userid}'; `
-    // const [row1,column1] =  await db.query(sql);
-    // console.log(row1)
-    // for (let x of row1){
-    //   io.to(x.ids).emit("data",data);
-
-    // }
+    await db.query(sql);
   })
 
 socket.on("disconnect",async(data)=>{
